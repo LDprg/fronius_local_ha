@@ -1,0 +1,10 @@
+{
+  "domain": "fronius_local",
+  "name": "Fronius local",
+  "codeowners": ["@LDprg"],
+  "config_flow": true,
+  "documentation": "https://github.com/LDprg/fronius_local_ha",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/LDprg/fronius_local_ha/issues",
+  "version": "0.1.0"
+}
