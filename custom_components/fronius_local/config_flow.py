@@ -5,7 +5,6 @@ from __future__ import annotations
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_PASSWORD, CONF_URL
-from homeassistant.helpers import httpx_client
 
 from . import const as fl
 from .api import FroniusApiClient
@@ -24,17 +23,19 @@ class FroniusLocalFlow(config_entries.ConfigFlow, domain=fl.DOMAIN):
         if user_input is not None:
             fl.LOGGER.info("Testing auth...")
 
-            url = user_input[CONF_URL]
+            url = user_input[CONF_URL].strip()
             passwd = user_input[CONF_PASSWORD]
 
             client = FroniusApiClient(
+                hass=self.hass,
                 url=url,
                 passwd=passwd,
-                httpx_client=httpx_client.create_async_httpx_client(self.hass),
             )
 
-            hwid = await client.get_hwid()
-            self.async_set_unique_id(hwid)
+            hwid = await client.async_get_hwid()
+            await self.async_set_unique_id(hwid)
+
+            await client.async_get_data()
 
             fl.LOGGER.info("Auth valid!")
 

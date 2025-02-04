@@ -1,6 +1,16 @@
 """Api for Fronius."""
 
-import httpx
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from homeassistant.helpers import httpx_client
+
+from . import auth
+from . import const as fl
+
+if TYPE_CHECKING:
+    from homeassistant.core import HomeAssistant
 
 
 class FroniusApiClient:
@@ -8,44 +18,43 @@ class FroniusApiClient:
 
     def __init__(
         self,
+        hass: HomeAssistant,
         url: str,
         passwd: str,
-        httpx_client: httpx,
-        user: str = "customer",
     ) -> None:
         """Init auth."""
         self.url = url
-        self.user = user
-        self.passwd = passwd
-        self.httpx = httpx_client
+        self.httpx = httpx_client.create_async_httpx_client(
+            hass=hass,
+            auth=auth.DigestAuthX("customer", passwd),
+            base_url=url,
+        )
 
-    async def get_hwid(self) -> str:
-        """Return hardware id."""
-        res = await self.get("/status/version")
+    async def async_get_data(self) -> dict:
+        """Update data."""
+        data = {}
 
-        return res["hardwareId"]
+        data["battery"] = await self.get("/config/batteries")
 
-    async def get_battery(self) -> dict:
-        """Return battery status."""
-        return await self.get("/config/batteries")
-
-    async def set_battery(self, data: dict) -> dict:
-        """Set battery config."""
-        return await self.post("/config/batteries", data)
+        return data
 
     async def post(self, path: str, data: dict) -> dict:
         """Request url from api."""
         res = await self.httpx.post(
-            self.url + path,
+            path,
             data=data,
-            auth=httpx.DigestAuth(self.user, self.passwd),
         )
+
+        fl.LOGGER.info(res.url)
+        fl.LOGGER.info(res)
         return res.json()
 
     async def get(self, path: str) -> dict:
         """Request url from api."""
         res = await self.httpx.get(
-            self.url + path,
-            auth=httpx.DigestAuth(self.user, self.passwd),
+            path,
         )
+
+        fl.LOGGER.info(res.url)
+        fl.LOGGER.info(res)
         return res.json()
