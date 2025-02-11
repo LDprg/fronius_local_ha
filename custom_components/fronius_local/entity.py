@@ -14,10 +14,10 @@ class FroniusEntity(CoordinatorEntity[FroniusCoordinator]):
 
     _attr_attribution = ATTRIBUTION
 
-    def __init__(self, coordinator: FroniusCoordinator) -> None:
+    def __init__(self, coordinator: FroniusCoordinator, unique_id: str) -> None:
         """Initialize."""
         super().__init__(coordinator)
-        self._attr_unique_id = coordinator.config_entry.entry_id
+        self._attr_unique_id = unique_id
         self._attr_device_info = DeviceInfo(
             identifiers={
                 (

@@ -1,7 +1,4 @@
-"""
-modified copy of DigestAuth from
-https://github.com/encode/httpx/blob/master/httpx/_auth.py.
-"""
+"""modified copy of DigestAuth from https://github.com/encode/httpx/blob/master/httpx/_auth.py."""
 
 from __future__ import annotations
 

@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
+    Platform.NUMBER,
 ]
 
 
@@ -33,7 +34,6 @@ async def async_setup_entry(
         logger=fl.LOGGER,
         name=fl.DOMAIN,
         update_interval=timedelta(seconds=fl.UPDATE_INTERVAL),
-        always_update=True,  # DEBUG ONLY
     )
 
     entry.runtime_data = FroniusData(
