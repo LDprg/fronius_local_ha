@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
 from homeassistant.const import Platform
 
-from . import const as fl
 from .entity import FroniusEntity
 
 if TYPE_CHECKING:
@@ -19,14 +23,11 @@ if TYPE_CHECKING:
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    _hass: HomeAssistant,
     entry: FroniusConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
-    for k, v in entry.runtime_data.coordinator.data.items():
-        fl.LOGGER.warn(str(k) + " ... " + str(v))
-     
     async_add_entities(
         FroniusSensor(
             coordinator=entry.runtime_data.coordinator,
@@ -54,7 +55,19 @@ class FroniusSensor(FroniusEntity, SensorEntity):
         super().__init__(coordinator, unique_id)
         self.entity_description = entity_description
 
-        self.native_unit_of_measurement = self.data()["unit"]
+        if self.data()["unit"] is not None:
+            self.native_unit_of_measurement = self.data()["unit"]
+
+        if self.entity_description.key.startswith("P_"):
+            self.native_unit_of_measurement = "W"
+            self.suggested_unit_of_measurement = "kW"
+            self.device_class = SensorDeviceClass.POWER
+            self.state_class = SensorStateClass.MEASUREMENT
+
+        if self.entity_description.key.startswith("rel_"):
+            self.native_unit_of_measurement = "%"
+            self.device_class = SensorDeviceClass.POWER_FACTOR
+            self.state_class = SensorStateClass.MEASUREMENT
 
     @property
     def native_value(self) -> str | None:

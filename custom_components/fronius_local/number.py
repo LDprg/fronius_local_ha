@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 from homeassistant.components.number import NumberEntity, NumberEntityDescription
 from homeassistant.const import Platform
 
-from . import const as fl
 from .entity import FroniusEntity
 
 if TYPE_CHECKING:
@@ -24,9 +23,6 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
-    for k, v in entry.runtime_data.coordinator.data.items():
-        fl.LOGGER.warn("NUMBER: " + str(k) + " ... " + str(v))
-
     async_add_entities(
         FroniusNumber(
             coordinator=entry.runtime_data.coordinator,

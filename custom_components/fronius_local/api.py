@@ -43,7 +43,7 @@ class FroniusApiClient:
         )
         self.trans = None
 
-    async def async_get_translation(self, lang: str = fl.DEFAULT_LANG) -> dict:
+    async def async_get_translation(self, lang: str) -> dict:
         """Return translated names."""
         if self.trans is None:
             self.trans = {}
@@ -63,8 +63,6 @@ class FroniusApiClient:
 
     async def async_get_data(self) -> dict:
         """Update data."""
-        data = {}
-
         battery = await self.get("/config/batteries")
 
         battery = {
@@ -86,9 +84,21 @@ class FroniusApiClient:
             if not is_meta(k)
         }
 
-        data = battery  # | dict2
+        powerflow = await self.get("/status/powerflow")
 
-        return data
+        powerflow = {
+            k: {
+                "value": v,
+                "type": Platform.SENSOR,
+                "name": k,
+                "id": k,
+                "url": "/status/powerflow",
+                "unit": None,
+            }
+            for (k, v) in powerflow.get("site").items()
+        }
+
+        return battery | powerflow
 
     async def post(self, path: str, data: dict) -> dict:
         """Request url from api."""
@@ -97,9 +107,6 @@ class FroniusApiClient:
             json=data,
         )
 
-        fl.LOGGER.info(res.url)
-        fl.LOGGER.info(data)
-        fl.LOGGER.info(res.json())
         return res.json()
 
     async def get(self, path: str) -> dict:
@@ -108,6 +115,4 @@ class FroniusApiClient:
             path,
         )
 
-        fl.LOGGER.info(res.url)
-        fl.LOGGER.info(res)
         return res.json()

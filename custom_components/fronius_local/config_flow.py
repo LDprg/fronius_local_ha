@@ -23,6 +23,9 @@ class FroniusLocalFlow(config_entries.ConfigFlow, domain=fl.DOMAIN):
         if user_input is not None:
             fl.LOGGER.info("Testing auth...")
 
+            if not user_input[CONF_URL].strip().startswith("http"):
+                user_input[CONF_URL] = "http://" + user_input[CONF_URL].strip()
+
             url = user_input[CONF_URL].strip()
             passwd = user_input[CONF_PASSWORD]
 

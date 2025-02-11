@@ -9,5 +9,4 @@ ATTRIBUTION = "Data fetched from the local Fronius API"
 
 LOGGER: logging.Logger = logging.getLogger(DOMAIN)
 
-DEFAULT_LANG = "en"
 UPDATE_INTERVAL = 9
