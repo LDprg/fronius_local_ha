@@ -39,7 +39,7 @@ async def async_setup_entry(
     entry.runtime_data = FroniusData(
         client=FroniusApiClient(
             hass=hass,
-            url=entry.data[CONF_URL].strip(),
+            url=entry.data[CONF_URL],
             passwd=entry.data[CONF_PASSWORD],
         ),
         integration=async_get_loaded_integration(hass, entry.domain),

@@ -8,7 +8,6 @@ from homeassistant.const import Platform
 from homeassistant.helpers import httpx_client
 
 from . import auth
-from . import const as fl
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
