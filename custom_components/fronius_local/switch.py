@@ -1,10 +1,10 @@
-"""Number platform for Fronius local."""
+"""Switch platform for Fronius local."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.components.number import NumberEntity, NumberEntityDescription
+from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.const import Platform
 
 from .entity import FroniusEntity
@@ -24,27 +24,27 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensor platform."""
     async_add_entities(
-        FroniusNumber(
+        FroniusSwitch(
             coordinator=entry.runtime_data.coordinator,
             unique_id=k,
-            entity_description=NumberEntityDescription(
+            entity_description=SwitchEntityDescription(
                 key=k,
                 name=v["name"],
             ),
         )
         for k, v in entry.runtime_data.coordinator.data.items()
-        if v["type"] == Platform.NUMBER
+        if v["type"] == Platform.SWITCH
     )
 
 
-class FroniusNumber(FroniusEntity, NumberEntity):
+class FroniusSwitch(FroniusEntity, SwitchEntity):
     """integration_blueprint Sensor class."""
 
     def __init__(
         self,
         coordinator: FroniusCoordinator,
         unique_id: str,
-        entity_description: NumberEntityDescription,
+        entity_description: SwitchEntityDescription,
     ) -> None:
         """Initialize the sensor class."""
         super().__init__(coordinator, unique_id)
@@ -53,18 +53,21 @@ class FroniusNumber(FroniusEntity, NumberEntity):
 
         self.extra_state_attributes = {"id": self.data()["id"]}
 
-        self.mode = "box"
-        self.native_unit_of_measurement = self.data()["unit"]
-
     @property
-    def native_value(self) -> float | None:
+    def is_on(self) -> bool | None:
         """Return the native value of the sensor."""
         return self.data()["value"]
 
-    async def async_set_native_value(self, value: float) -> None:
-        """Update the current value."""
-        await self.coordinator.config_entry.runtime_data.client.post(
-            self.data()["url"], {self.data()["id"]: int(value)}
+    async def async_turn_on(self, **_kwargs: any) -> None:
+        """Turn the entity on."""
+        await self.coordinator.config_entry.runtime_data.client.async_set_timeofuse(
+            self.data()["nr"], True
+        )
+
+    async def async_turn_off(self, **_kwargs: any) -> None:
+        """Turn the entity on."""
+        await self.coordinator.config_entry.runtime_data.client.async_set_timeofuse(
+            self.data()["nr"], False
         )
 
     def data(self) -> dict | None:

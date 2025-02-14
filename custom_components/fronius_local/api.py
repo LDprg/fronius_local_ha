@@ -107,7 +107,29 @@ class FroniusApiClient:
             for (k, v) in powerflow.get("site").items()
         }
 
-        return battery | powerflow
+        timeofuse = await self.get("/config/timeofuse")
+
+        timeofuse = {
+            "timeuse_" + str(idx + 1): {
+                "value": item.get("Active"),
+                "type": Platform.SWITCH,
+                "name": "Active " + str(idx + 1),
+                "id": "timeuse_" + str(idx + 1),
+                "nr": idx,
+                "url": "/config/timeofuse",
+                "unit": None,
+            }
+            for idx, item in enumerate(timeofuse.get("timeofuse"))
+        }
+
+        return battery | powerflow | timeofuse
+
+    async def async_set_timeofuse(self, idx: int, active: bool) -> None:
+        """Set timeofuse."""
+        timeofuse = await self.get("/config/timeofuse")
+        timeofuse = timeofuse.get("timeofuse")
+        timeofuse[idx]["Active"] = active
+        await self.post("/config/timeofuse", {"timeofuse": timeofuse})
 
     async def post(self, path: str, data: dict) -> dict:
         """Request url from api."""
