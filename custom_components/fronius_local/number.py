@@ -49,6 +49,9 @@ class FroniusNumber(FroniusEntity, NumberEntity):
         """Initialize the sensor class."""
         super().__init__(coordinator, unique_id)
         self.entity_description = entity_description
+        self.entity_id = "number." + unique_id
+
+        self.extra_state_attributes = {"id": self.data()["id"]}
 
         self.mode = "box"
         self.native_unit_of_measurement = self.data()["unit"]

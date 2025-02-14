@@ -54,6 +54,9 @@ class FroniusSensor(FroniusEntity, SensorEntity):
         """Initialize the sensor class."""
         super().__init__(coordinator, unique_id)
         self.entity_description = entity_description
+        self.entity_id = "sensor." + unique_id
+
+        self.extra_state_attributes = {"id": self.data()["id"]}
 
         if self.data()["unit"] is not None:
             self.native_unit_of_measurement = self.data()["unit"]

@@ -8,6 +8,7 @@ from homeassistant.const import Platform
 from homeassistant.helpers import httpx_client
 
 from . import auth
+from . import const as fl
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -21,6 +22,18 @@ def is_meta(item: str) -> bool:
 def meta(item: str) -> str:
     """Return meta string."""
     return "_" + item + "_meta"
+
+
+def get_type(data: dict, key: str) -> Platform:
+    """Get type of sensor."""
+    if key in fl.FILTER:
+        return Platform.SENSOR
+    if (
+        data[meta(key)]["writePermission"]["RoleCustomer"]
+        and data[meta(key)]["displayType"] == "Integer"
+    ):
+        return Platform.NUMBER
+    return Platform.SENSOR
 
 
 class FroniusApiClient:
@@ -67,10 +80,7 @@ class FroniusApiClient:
         battery = {
             "conf_batteries_" + k: {
                 "value": v,
-                "type": Platform.NUMBER
-                if battery[meta(k)]["writePermission"]["RoleCustomer"]
-                and battery[meta(k)]["displayType"] == "Integer"
-                else Platform.SENSOR,
+                "type": get_type(battery, k),
                 "name": (await self.async_get_translation(self.hass.config.language))[
                     "BATTERIES"
                 ].get(k)
