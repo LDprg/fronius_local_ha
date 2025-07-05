@@ -77,7 +77,7 @@ class FroniusApiClient:
 
     async def async_get_data(self) -> dict:
         """Update data."""
-        battery = await self.get("/config/batteries")
+        battery = await self.get("/api/config/batteries")
 
         battery = {
             "conf_batteries_" + k: {
@@ -88,14 +88,14 @@ class FroniusApiClient:
                 ].get(k)
                 or "CONF_BATTERIES_" + k,
                 "id": k,
-                "url": "/config/batteries",
+                "url": "/api/config/batteries",
                 "unit": battery[meta(k)].get("unit"),
             }
             for (k, v) in battery.items()
             if not is_meta(k)
         }
 
-        powerflow = await self.get("/status/powerflow")
+        powerflow = await self.get("/api/status/powerflow")
 
         powerflow = {
             k: {
@@ -103,13 +103,13 @@ class FroniusApiClient:
                 "type": Platform.SENSOR,
                 "name": k,
                 "id": k,
-                "url": "/status/powerflow",
+                "url": "/api/status/powerflow",
                 "unit": None,
             }
             for (k, v) in powerflow.get("site").items()
         }
 
-        timeofuse = await self.get("/config/timeofuse")
+        timeofuse = await self.get("/api/config/timeofuse")
 
         timeofuse = {
             "timeuse_" + str(idx + 1): {
@@ -118,7 +118,7 @@ class FroniusApiClient:
                 "name": "Active " + str(idx + 1),
                 "id": "timeuse_" + str(idx + 1),
                 "nr": idx,
-                "url": "/config/timeofuse",
+                "url": "/api/config/timeofuse",
                 "unit": None,
             }
             for idx, item in enumerate(timeofuse.get("timeofuse"))
@@ -128,10 +128,10 @@ class FroniusApiClient:
 
     async def async_set_timeofuse(self, idx: int, active: bool) -> None:
         """Set timeofuse."""
-        timeofuse = await self.get("/config/timeofuse")
+        timeofuse = await self.get("/api/config/timeofuse")
         timeofuse = timeofuse.get("timeofuse")
         timeofuse[idx]["Active"] = active
-        await self.post("/config/timeofuse", {"timeofuse": timeofuse})
+        await self.post("/api/config/timeofuse", {"timeofuse": timeofuse})
 
     async def post(self, path: str, data: dict) -> dict:
         """Request url from api."""
