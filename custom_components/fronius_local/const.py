@@ -11,6 +11,8 @@ LOGGER: logging.Logger = logging.getLogger(DOMAIN)
 
 UPDATE_INTERVAL = 9
 
+SUPPORTED_LOCALES = ["en", "de", "es", "fr", "it", "hu", "pl", "pt", "ru", "uk"]
+
 FILTER = [
     "PV_PEAK_POWER",
     "supportSoc",
