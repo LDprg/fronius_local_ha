@@ -1,5 +1,5 @@
 # fronius_local_ha
-A homassistant addon for accesing fronius locally 
+A homassistant addon for accessing fronius locally
 
 # DISCLAIMER
 !!USE AT YOUR OWN RISK!!
