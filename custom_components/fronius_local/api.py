@@ -61,8 +61,10 @@ class FroniusApiClient:
             self.trans = {}
 
         if self.trans.get(lang) is None:
+            if lang not in fl.SUPPORTED_LOCALES:
+                lang = "en"
             self.trans[lang] = await self.get(
-                "http://192.168.0.42/app/assets/i18n/WeblateTranslations/config/"
+                "/app/assets/i18n/WeblateTranslations/config/"
                 + lang
                 + ".json"
             )
