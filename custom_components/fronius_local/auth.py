@@ -23,8 +23,10 @@ class DigestAuthX(Auth):
         "SHA": hashlib.sha1,
         "SHA-SESS": hashlib.sha1,
         "SHA-256": hashlib.sha256,
+        "SHA256": hashlib.sha256,
         "SHA-256-SESS": hashlib.sha256,
         "SHA-512": hashlib.sha512,
+        "SHA512": hashlib.sha512,
         "SHA-512-SESS": hashlib.sha512,
     }
 
