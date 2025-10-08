@@ -50,7 +50,7 @@ class FroniusApiClient:
         self.url = url
         self.httpx = httpx_client.create_async_httpx_client(
             hass=hass,
-            auth=auth.DigestAuth("customer", passwd),
+            auth=auth.DigestAuthX("customer", passwd),
             base_url=url,
         )
         self.trans = None

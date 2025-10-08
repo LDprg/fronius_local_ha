@@ -5,174 +5,18 @@ import os
 import re
 import time
 import typing
-from base64 import b64encode
 from urllib.request import parse_http_list
 
 from httpx._exceptions import ProtocolError
 from httpx._models import Cookies, Request, Response
 from httpx._utils import to_bytes, to_str, unquote
 
+from httpx import Auth
+
 if typing.TYPE_CHECKING:  # pragma: no cover
     from hashlib import _Hash
 
-
-__all__ = ["Auth", "BasicAuth", "DigestAuth", "NetRCAuth"]
-
-
-class Auth:
-    """
-    Base class for all authentication schemes.
-
-    To implement a custom authentication scheme, subclass `Auth` and override
-    the `.auth_flow()` method.
-
-    If the authentication scheme does I/O such as disk access or network calls, or uses
-    synchronization primitives such as locks, you should override `.sync_auth_flow()`
-    and/or `.async_auth_flow()` instead of `.auth_flow()` to provide specialized
-    implementations that will be used by `Client` and `AsyncClient` respectively.
-    """
-
-    requires_request_body = False
-    requires_response_body = False
-
-    def auth_flow(self, request: Request) -> typing.Generator[Request, Response, None]:
-        """
-        Execute the authentication flow.
-
-        To dispatch a request, `yield` it:
-
-        ```
-        yield request
-        ```
-
-        The client will `.send()` the response back into the flow generator. You can
-        access it like so:
-
-        ```
-        response = yield request
-        ```
-
-        A `return` (or reaching the end of the generator) will result in the
-        client returning the last response obtained from the server.
-
-        You can dispatch as many requests as is necessary.
-        """
-        yield request
-
-    def sync_auth_flow(
-        self, request: Request
-    ) -> typing.Generator[Request, Response, None]:
-        """
-        Execute the authentication flow synchronously.
-
-        By default, this defers to `.auth_flow()`. You should override this method
-        when the authentication scheme does I/O and/or uses concurrency primitives.
-        """
-        if self.requires_request_body:
-            request.read()
-
-        flow = self.auth_flow(request)
-        request = next(flow)
-
-        while True:
-            response = yield request
-            if self.requires_response_body:
-                response.read()
-
-            try:
-                request = flow.send(response)
-            except StopIteration:
-                break
-
-    async def async_auth_flow(
-        self, request: Request
-    ) -> typing.AsyncGenerator[Request, Response]:
-        """
-        Execute the authentication flow asynchronously.
-
-        By default, this defers to `.auth_flow()`. You should override this method
-        when the authentication scheme does I/O and/or uses concurrency primitives.
-        """
-        if self.requires_request_body:
-            await request.aread()
-
-        flow = self.auth_flow(request)
-        request = next(flow)
-
-        while True:
-            response = yield request
-            if self.requires_response_body:
-                await response.aread()
-
-            try:
-                request = flow.send(response)
-            except StopIteration:
-                break
-
-
-class FunctionAuth(Auth):
-    """
-    Allows the 'auth' argument to be passed as a simple callable function,
-    that takes the request, and returns a new, modified request.
-    """
-
-    def __init__(self, func: typing.Callable[[Request], Request]) -> None:
-        self._func = func
-
-    def auth_flow(self, request: Request) -> typing.Generator[Request, Response, None]:
-        yield self._func(request)
-
-
-class BasicAuth(Auth):
-    """
-    Allows the 'auth' argument to be passed as a (username, password) pair,
-    and uses HTTP Basic authentication.
-    """
-
-    def __init__(self, username: str | bytes, password: str | bytes) -> None:
-        self._auth_header = self._build_auth_header(username, password)
-
-    def auth_flow(self, request: Request) -> typing.Generator[Request, Response, None]:
-        request.headers["Authorization"] = self._auth_header
-        yield request
-
-    def _build_auth_header(self, username: str | bytes, password: str | bytes) -> str:
-        userpass = b":".join((to_bytes(username), to_bytes(password)))
-        token = b64encode(userpass).decode()
-        return f"Basic {token}"
-
-
-class NetRCAuth(Auth):
-    """
-    Use a 'netrc' file to lookup basic auth credentials based on the url host.
-    """
-
-    def __init__(self, file: str | None = None) -> None:
-        # Lazily import 'netrc'.
-        # There's no need for us to load this module unless 'NetRCAuth' is being used.
-        import netrc
-
-        self._netrc_info = netrc.netrc(file)
-
-    def auth_flow(self, request: Request) -> typing.Generator[Request, Response, None]:
-        auth_info = self._netrc_info.authenticators(request.url.host)
-        if auth_info is None or not auth_info[2]:
-            # The netrc file did not have authentication credentials for this host.
-            yield request
-        else:
-            # Build a basic auth header with credentials from the netrc file.
-            request.headers["Authorization"] = self._build_auth_header(
-                username=auth_info[0], password=auth_info[2]
-            )
-            yield request
-
-    def _build_auth_header(self, username: str | bytes, password: str | bytes) -> str:
-        userpass = b":".join((to_bytes(username), to_bytes(password)))
-        token = b64encode(userpass).decode()
-        return f"Basic {token}"
-
-
-class DigestAuth(Auth):
+class DigestAuthX(Auth):
     _ALGORITHM_TO_HASH_FUNCTION: dict[str, typing.Callable[[bytes], _Hash]] = {
         "MD5": hashlib.md5,
         "MD5-SESS": hashlib.md5,
