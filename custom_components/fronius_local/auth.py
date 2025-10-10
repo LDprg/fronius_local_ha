@@ -7,14 +7,14 @@ import time
 import typing
 from urllib.request import parse_http_list
 
+from httpx import Auth
 from httpx._exceptions import ProtocolError
 from httpx._models import Cookies, Request, Response
 from httpx._utils import to_bytes, to_str, unquote
 
-from httpx import Auth
-
 if typing.TYPE_CHECKING:  # pragma: no cover
     from hashlib import _Hash
+
 
 class DigestAuthX(Auth):
     _ALGORITHM_TO_HASH_FUNCTION: dict[str, typing.Callable[[bytes], _Hash]] = {
@@ -44,12 +44,12 @@ class DigestAuthX(Auth):
 
         response = yield request
 
-        if response.status_code != 401 or "x-www-authenticate" not in response.headers:
+        if response.status_code != 401 or "X-WWW-Authenticate" not in response.headers:
             # If the response is not a 401 then we don't
             # need to build an authenticated request.
             return
 
-        for auth_header in response.headers.get_list("x-www-authenticate"):
+        for auth_header in response.headers.get_list("X-WWW-Authenticate"):
             if auth_header.lower().startswith("digest "):
                 break
         else:
@@ -106,6 +106,9 @@ class DigestAuthX(Auth):
         def digest(data: bytes) -> bytes:
             return hash_func(data).hexdigest().encode()
 
+        def digest_md5(data: bytes) -> bytes:
+            return hashlib.md5(data).hexdigest().encode()
+
         A1 = b":".join((self._username, challenge.realm, self._password))
 
         path = request.url.raw_path
@@ -117,7 +120,7 @@ class DigestAuthX(Auth):
         cnonce = self._get_client_nonce(self._nonce_count, challenge.nonce)
         self._nonce_count += 1
 
-        HA1 = digest(A1)
+        HA1 = digest_md5(A1)
         if challenge.algorithm.lower().endswith("-sess"):
             HA1 = digest(b":".join((HA1, challenge.nonce, cnonce)))
 

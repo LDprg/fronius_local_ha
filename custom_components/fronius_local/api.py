@@ -64,9 +64,7 @@ class FroniusApiClient:
             if lang not in fl.SUPPORTED_LOCALES:
                 lang = "en"
             self.trans[lang] = await self.get(
-                "/app/assets/i18n/WeblateTranslations/config/"
-                + lang
-                + ".json"
+                "/app/assets/i18n/WeblateTranslations/config/" + lang + ".json"
             )
 
         return self.trans[lang]
@@ -144,9 +142,9 @@ class FroniusApiClient:
 
     async def get(self, path: str) -> dict:
         """Request url from api."""
-        res = await self.httpx.get(
-            path,
-            follow_redirects=True
-        )
+        res = await self.httpx.get(path, follow_redirects=True)
+
+        print(path)
+        print(res.text)
 
         return res.json()
