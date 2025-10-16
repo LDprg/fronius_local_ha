@@ -144,7 +144,4 @@ class FroniusApiClient:
         """Request url from api."""
         res = await self.httpx.get(path, follow_redirects=True)
 
-        print(path)
-        print(res.text)
-
         return res.json()
