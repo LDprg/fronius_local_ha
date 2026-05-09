@@ -31,7 +31,7 @@ async def async_setup_entry(
     async_add_entities(
         FroniusSensor(
             coordinator=entry.runtime_data.coordinator,
-            unique_id=k,
+            unique_id=k.lower(),
             entity_description=SensorEntityDescription(
                 key=k,
                 name=v["name"],

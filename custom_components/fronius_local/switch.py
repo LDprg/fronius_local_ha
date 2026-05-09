@@ -26,7 +26,7 @@ async def async_setup_entry(
     async_add_entities(
         FroniusSwitch(
             coordinator=entry.runtime_data.coordinator,
-            unique_id=k,
+            unique_id=k.lower(),
             entity_description=SwitchEntityDescription(
                 key=k,
                 name=v["name"],
@@ -49,7 +49,7 @@ class FroniusSwitch(FroniusEntity, SwitchEntity):
         """Initialize the sensor class."""
         super().__init__(coordinator, unique_id)
         self.entity_description = entity_description
-        self.entity_id = "number." + unique_id
+        self.entity_id = "switch." + unique_id
 
         self.extra_state_attributes = {"id": self.data()["id"]}
 

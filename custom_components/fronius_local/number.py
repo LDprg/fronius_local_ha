@@ -26,7 +26,7 @@ async def async_setup_entry(
     async_add_entities(
         FroniusNumber(
             coordinator=entry.runtime_data.coordinator,
-            unique_id=k,
+            unique_id=k.lower(),
             entity_description=NumberEntityDescription(
                 key=k,
                 name=v["name"],
