@@ -77,6 +77,6 @@ class FroniusSensor(FroniusEntity, SensorEntity):
         """Return the native value of the sensor."""
         return self.data()["value"]
 
-    def data(self) -> dict | None:
+    def data(self) -> dict:
         """Fetch entity data."""
         return self.coordinator.data[self.entity_description.key]

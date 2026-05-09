@@ -4,9 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.components.number import NumberEntity, NumberEntityDescription
+from homeassistant.components.number import (
+    NumberEntity,
+    NumberEntityDescription,
+    NumberMode,
+)
 from homeassistant.const import Platform
 
+from . import const as fl
 from .entity import FroniusEntity
 
 if TYPE_CHECKING:
@@ -51,9 +56,24 @@ class FroniusNumber(FroniusEntity, NumberEntity):
         self.entity_description = entity_description
         self.entity_id = "number." + unique_id
 
+        fl.LOGGER.warning(self.data())
+
+        val = self.data()["val"]
+        if val is not None:
+            val = val["default"]["ranges"]["default_range"]
+            if val.get("lowerBound") is not None:
+                self.native_min_value = val["lowerBound"]
+            else:
+                self.native_min_value = float("-inf")
+
+            if val.get("upperBound") is not None:
+                self.native_max_value = val["upperBound"]
+            else:
+                self.native_min_value = float("inf")
+
         self.extra_state_attributes = {"id": self.data()["id"]}
 
-        self.mode = "box"
+        self.mode = NumberMode.BOX
         self.native_unit_of_measurement = self.data()["unit"]
 
     @property
@@ -67,6 +87,6 @@ class FroniusNumber(FroniusEntity, NumberEntity):
             self.data()["url"], {self.data()["id"]: int(value)}
         )
 
-    def data(self) -> dict | None:
+    def data(self) -> dict:
         """Fetch entity data."""
         return self.coordinator.data[self.entity_description.key]

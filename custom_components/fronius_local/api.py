@@ -88,6 +88,7 @@ class FroniusApiClient:
                 "id": k,
                 "url": "/api/config/batteries",
                 "unit": battery[meta(k)].get("unit"),
+                "val": battery[meta(k)].get("validators"),
             }
             for (k, v) in battery.items()
             if not is_meta(k)

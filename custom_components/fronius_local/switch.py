@@ -61,15 +61,15 @@ class FroniusSwitch(FroniusEntity, SwitchEntity):
     async def async_turn_on(self, **_kwargs: any) -> None:
         """Turn the entity on."""
         await self.coordinator.config_entry.runtime_data.client.async_set_timeofuse(
-            self.data()["nr"], True
+            self.data()["nr"], active=True
         )
 
     async def async_turn_off(self, **_kwargs: any) -> None:
         """Turn the entity on."""
         await self.coordinator.config_entry.runtime_data.client.async_set_timeofuse(
-            self.data()["nr"], False
+            self.data()["nr"], active=False
         )
 
-    def data(self) -> dict | None:
+    def data(self) -> dict:
         """Fetch entity data."""
         return self.coordinator.data[self.entity_description.key]
