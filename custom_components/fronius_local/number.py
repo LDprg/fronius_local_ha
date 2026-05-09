@@ -56,8 +56,6 @@ class FroniusNumber(FroniusEntity, NumberEntity):
         self.entity_description = entity_description
         self.entity_id = "number." + unique_id
 
-        fl.LOGGER.warning(self.data())
-
         val = self.data()["val"]
         if val is not None:
             val = val["default"]["ranges"]["default_range"]
