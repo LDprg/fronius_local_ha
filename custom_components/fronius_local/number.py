@@ -68,7 +68,7 @@ class FroniusNumber(FroniusEntity, NumberEntity):
             if val.get("upperBound") is not None:
                 self.native_max_value = val["upperBound"]
             else:
-                self.native_min_value = sys.float_info.max
+                self.native_max_value = sys.float_info.max
 
         self.extra_state_attributes = {"id": self.data()["id"]}
 
