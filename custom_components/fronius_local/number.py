@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from typing import TYPE_CHECKING
 
 from homeassistant.components.number import (
@@ -62,12 +63,12 @@ class FroniusNumber(FroniusEntity, NumberEntity):
             if val.get("lowerBound") is not None:
                 self.native_min_value = val["lowerBound"]
             else:
-                self.native_min_value = float("-inf")
+                self.native_min_value = sys.float_info.min
 
             if val.get("upperBound") is not None:
                 self.native_max_value = val["upperBound"]
             else:
-                self.native_min_value = float("inf")
+                self.native_min_value = sys.float_info.max
 
         self.extra_state_attributes = {"id": self.data()["id"]}
 
