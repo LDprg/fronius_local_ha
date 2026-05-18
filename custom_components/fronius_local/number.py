@@ -63,7 +63,7 @@ class FroniusNumber(FroniusEntity, NumberEntity):
             if val.get("lowerBound") is not None:
                 self.native_min_value = val["lowerBound"]
             else:
-                self.native_min_value = sys.float_info.min
+                self.native_min_value = -sys.float_info.max
 
             if val.get("upperBound") is not None:
                 self.native_max_value = val["upperBound"]
