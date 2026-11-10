@@ -7,13 +7,21 @@ import time
 import typing
 from urllib.request import parse_http_list
 
-from httpx import Auth
-from httpx._exceptions import ProtocolError
-from httpx._models import Cookies, Request, Response
-from httpx._utils import to_bytes, to_str, unquote
+from httpx import Auth, Cookies, ProtocolError, Request, Response
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     from hashlib import _Hash
+
+def to_bytes(value: str | bytes, encoding: str = "utf-8") -> bytes:
+    return value.encode(encoding) if isinstance(value, str) else value
+
+
+def to_str(value: str | bytes, encoding: str = "utf-8") -> str:
+    return value if isinstance(value, str) else value.decode(encoding)
+
+
+def unquote(value: str) -> str:
+    return value[1:-1] if len(value) >= 2 and value[0] == value[-1] == '"' else value
 
 
 class DigestAuthX(Auth):
